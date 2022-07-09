@@ -1,3 +1,5 @@
 *.txt
 *.asv
 data_log
+2022-*
+*.zip
