@@ -7,12 +7,8 @@ in the `user` folder:
 ```bash
  Create_Formation([-8,8],[-8,8],6)
 ```
+Click to create desired position.
 ### Start the Simulation
 ```bash
-formation.m
+formation_single.m
 ```
-### Data Save and Visualization 
-
-
-## Guidance on Gazebo
-
