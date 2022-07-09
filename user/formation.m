@@ -2,6 +2,7 @@ clear;
 %% Initialization
 % important hyperparas
 numRobots = 5;
+is_init_near=true;
 max_translational_v = 0.5;  % m/s
 max_rotational_w = 2.84;     % rad/s
 sampleTime = 0.01;              % Sample time [s]
@@ -24,6 +25,7 @@ env.showConnection = true;
 env.showRealTime = true;
 env.showCommand = true;
 env.saveData = true;
+
 % variable initialization
 graph_matrix_semi = zeros(numRobots,numRobots);
 vel_xy = zeros(2,numRobots);
@@ -31,6 +33,7 @@ vel_vw = zeros(2,numRobots);
 d_poses = zeros(3,numRobots);
 distance_u = zeros(2,1);
 neighbor_list_ordered = zeros(nearest_seleted_num,1);
+
 % calculate base graph_matrix_semi.
 for row = 1:numRobots-2
     graph_matrix_semi(row,row) = 1;
@@ -43,17 +46,20 @@ graph_matrix_semi(numRobots,numRobots) = 1;
 graph_matrix_semi(1,numRobots) = 1;
 
 % read q_desire from files
-fid= fopen('formation_data.txt', 'r');    % clear the data in txt
+fid= fopen('formation_data.txt', 'r');
 q_desire =fscanf(fid, '%f', [numRobots*2,1]);
 
 % calculate initial pose
-poses = zeros(3,numRobots);
-for i=1:numRobots
-    poses(1,i) = q_desire(i*2-1) + randn;
-    poses(2,i) = q_desire(i*2) + randn;
+if is_init_near
+    for i=1:numRobots
+        poses = zeros(3,numRobots);
+        poses(1,i) = q_desire(i*2-1) + randn;
+        poses(2,i) = q_desire(i*2) + randn;
+    end
+else
+    poses = [3*(rand(2,numRobots) - 0.5); ...
+            pi*rand(1,numRobots)];
 end
-% poses = [3*(rand(2,numRobots) - 0.5); ...
-%          pi*rand(1,numRobots)];
 
 %% Calculate Control Matrix
 [matrix_value,connection_list,graph_matrix_semi_value,Solve_Status_list]=Cal_Control_Matrix_For_All(numRobots,graph_matrix_semi,rand_id);
