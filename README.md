@@ -1,34 +1,32 @@
-# Mobile Robotics Simulation Toolbox
-Copyright 2018-2019 The MathWorks, Inc.
+# Distibuted Multi-Agent Formation Controller based on Laplace Matrix
+A distributed multi-agent formation controller and corresponding simulation base on [mobile robotics simulation toolbox](https://github.com/mathworks-robotics/mobile-robotics-simulation-toolbox) and Gazebo.
+![preview1](media/ukafv-rc8tq.gif)
+## Guidance
+![Platform](media/Platform.PNG "Platform")
+1. create a desired formation by manually selecting desired points.
+```bash
+ Create_Formation($xlimit,$ylimit)
+```
+- eg: `Create_Formation([-8,8],[-8,8])`
+2. set parameters for visualization in `formation_single` file.
 
-------------------------------------------------------------------------------------------
+| Syntax      | If True |
+| ----------- | ----------- |
+| showTrajectory      | show xy trajectory   |
+| showDesired   | show desired positions        |
+| showConnection   | show sensing connections between agents        |
+| showRealTime   | show real time indicator       |
+| showCommand   | show [vx,vy] commands        |
+| saveData   | save log data to workspace        |
 
-## About the Toolbox
+3. start the simulation
+```bash
+formation_single
+```
+## Algorithm Introduction
+TODO
 
-This toolbox provides utilities for robot simulation and algorithm development. 
+## TurtleBot3 Simulation
+we also create a package for distributed formation control based on [Turtlebot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/simulation/#gazebo-simulation), an open source ROS standard platform robot. 
 
-This includes:
-* 2D kinematic models for robot geometries such as differential drive, three, and four-wheeled vehicles, including forward and inverse kinematics
-* Configurable lidar and object detector simulators 
-* Visualization of robotic vehicles and sensors in occupancy grid maps
-* MATLAB and Simulink examples and documentation
-
-------------------------------------------------------------------------------------------
-
-## Getting Started
-
-Download the toolbox either by cloning this repository or downloading as a ZIP file. 
-In MATLAB, navigate to the folder containing the toolbox and run the 
-`startMobileRoboticsSimulationToolbox.m` script.
-
-Alternatively, you can download the MATLAB toolbox file from the "Releases" section. 
-You can install the toolbox file directly to MATLAB.
-
-Regardless of how you install it, refer to the `GettingStarted.mlx` 
-Live Script included to learn more about this toolbox.
-
-Refer to the following videos for more information.
-
-* [Simulating Mobile Robots with MATLAB and Simulink](https://www.mathworks.com/videos/matlab-and-simulink-robotics-arena-getting-started-with-the-mobile-robotics-simulation-toolbox-1523443253912.html)
-* [Programming Robot Swarms](https://www.mathworks.com/videos/matlab-and-simulink-robotics-arena-programming-robot-swarms-1539080970349.html)
-* [Programming Soccer Robot Behavior](https://www.mathworks.com/videos/programming-soccer-robot-behavior-1554386041395.html)
+[Here]() is the git repository for gazebo simulation and algorithm implementation on TurtleBot3.
