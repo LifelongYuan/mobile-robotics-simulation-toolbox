@@ -1,6 +1,6 @@
 # Distibuted Multi-Agent Formation Controller based on Laplace Matrix
 A distributed multi-agent formation controller and corresponding simulation base on [mobile robotics simulation toolbox](https://github.com/mathworks-robotics/mobile-robotics-simulation-toolbox) and Gazebo.
-![preview1](media/ukafv-rc8tq.gif)
+![preview1](media/dr6zx-yw6q7.gif)
 ## Guidance
 ![Platform](media/Platform.PNG "Platform")
 1. create a desired formation by manually selecting desired points.

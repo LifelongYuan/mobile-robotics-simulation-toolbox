@@ -1,11 +1,11 @@
 clear;
 %% Initialization
 % important hyperparas
-numRobots = 9;
+numRobots = 8;
 is_init_near=false;
-max_translational_v = 0.5;  % m/s
+max_translational_v = 1.4;  % m/s
 max_rotational_w = 2.84;     % rad/s
-sampleTime = 0.1;              % Sample time [s]
+sampleTime = 0.05;              % Sample time [s]
 tVec = 0:sampleTime:10000;        % Time array
 distance_control_id_pair = [1;8];
 rand_id = 2;
@@ -13,8 +13,8 @@ nearest_seleted_num = 2;
 delta = 0.1;
 k_vector_control = 0.6;
 k_gradient_control = 0.4;
-k_formation_keeping = 0.2;
-k_leader_tracking = 0.8;
+k_formation_keeping = 0.5;
+k_leader_tracking = 0.5;
 % multi_env settings
 env = MultiRobotEnv(numRobots);
 env.robotRadius = 0.15;
@@ -46,7 +46,7 @@ if is_init_near==true
         poses(2,i) = q_desire(i*2) + randn;
     end
 else
-    poses = [8*(rand(2,numRobots))-4;pi*rand(1,numRobots)];
+    poses = [10*(rand(2,numRobots))-5;pi*rand(1,numRobots)];
 end
 
 %% Calculate Control Matrix
