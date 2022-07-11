@@ -1,5 +1,5 @@
 
-function Create_Formation(xlimit,ylimit,agent_num)
+function Create_Formation(xlimit,ylimit)
 close all;
 figure;
 [~] = fopen('formation_data.txt', 'w');    % clear the data in txt

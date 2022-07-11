@@ -1,30 +1,29 @@
 clear;
 %% Initialization
 % important hyperparas
-numRobots = 12;
-is_init_near=true;
+numRobots = 9;
+is_init_near=false;
 max_translational_v = 0.5;  % m/s
 max_rotational_w = 2.84;     % rad/s
-sampleTime = 0.01;              % Sample time [s]
+sampleTime = 0.1;              % Sample time [s]
 tVec = 0:sampleTime:10000;        % Time array
-distance_control_id_pair = [1;5];
+distance_control_id_pair = [1;8];
 rand_id = 2;
 nearest_seleted_num = 2;
-distance_tolerance = 0.1;
 delta = 0.1;
-k_vector_control = 0.5;
-k_gradient_control = 0.5;
-k_formation_keeping = 0.5;
-k_leader_tracking = 0.5;
+k_vector_control = 0.6;
+k_gradient_control = 0.4;
+k_formation_keeping = 0.2;
+k_leader_tracking = 0.8;
 % multi_env settings
 env = MultiRobotEnv(numRobots);
 env.robotRadius = 0.15;
 env.showTrajectory = false;
 env.showDesired = true;
-env.showConnection = false;
+env.showConnection = true;
 env.showRealTime = true;
 env.showCommand = false;
-env.saveData = true;
+env.saveData = false;
 
 % variable initialization
 vel_xy = zeros(2,numRobots);
@@ -61,13 +60,20 @@ for idx = 2:numel(tVec)
     env(1:numRobots,poses,q_desire,graph_matrix_semi,real_time_now,vel_xy,vel_vw);
     xlim([-8 8]);   % Without this, axis resizing can slow things down
     ylim([-8 8]);
-
     for rIdx = 1:numRobots
         [vel_vw(:,rIdx),vel_xy(:,rIdx)] = swarmTeamController(poses,rIdx,Control_Matrix(2*rIdx-1:2*rIdx,:));
-        [vel_vw_gradient,vel_xy_gradient] = Gradient_Controller(rIdx,poses,q_desire,distance_tolerance,delta);
-        vel_vw(:,rIdx) = vel_vw(:,rIdx) .*k_vector_control + vel_vw_gradient.* k_gradient_control;
-        vel_vw(:,rIdx) = vel_vw(:,rIdx) .* [max_translational_v;max_rotational_w];
-        vel_xy(:,rIdx) = vel_xy(:,rIdx).*k_vector_control + vel_xy_gradient.* k_gradient_control;
+        [vel_vw_gradient,vel_xy_gradient] = Gradient_Controller(rIdx,poses,q_desire,delta);
+        if (rIdx~=distance_control_id_pair(1))  &&  (rIdx~=distance_control_id_pair(2))
+            vel_vw(:,rIdx) = vel_vw(:,rIdx) .*k_vector_control + vel_vw_gradient.* k_gradient_control;
+            vel_xy(:,rIdx) = vel_xy(:,rIdx).*k_vector_control + vel_xy_gradient.* k_gradient_control;
+            vel_vw(:,rIdx) = vel_vw(:,rIdx) .* [max_translational_v;max_rotational_w];
+        else
+            vel_vw(:,rIdx) = vel_vw_gradient;
+            vel_xy(:,rIdx) = vel_xy_gradient;
+        end
+    
+
+
         d_poses(:,rIdx) = [cos(poses(3,rIdx)),0;sin(poses(3,rIdx)),0;0,1] * vel_vw(:,rIdx);
     end
 
@@ -111,11 +117,6 @@ function [vel_vw,vel_xy] = swarmTeamController(poses,rIdx,control_m)
         vel_xy = vel_xy ./ norm_vel;
     end
 
-    % try to stop when approaching the target position.
-    if norm(vel_xy)<=0.5
-        vel_xy(1)=0;
-        vel_xy(2)=0;
-    end
     h_matrix= zeros(2,2);
     h_matrix(:,:) = [   cos(poses(3,rIdx)),...
                         sin(poses(3,rIdx));
@@ -128,7 +129,7 @@ end
 %% sub-controllers and utility functions
 function [target_u,target_xy] = Calculate_Target_U(target_pose,pose_now)  % linear control law ;return [v,w]
     pose_xy_diff = target_pose(1:2) - pose_now(1:2);
-    if norm(pose_xy_diff) ~=0
+    if norm(pose_xy_diff) ~=0 && norm(pose_xy_diff)>1
         pose_xy_diff = pose_xy_diff./norm(pose_xy_diff);
     end
     co_matrix = [cos(pose_now(3)),sin(pose_now(3));-sin(pose_now(3)),cos(pose_now(3))];
@@ -143,17 +144,15 @@ function q_distance = Get_Desired_Distance_from_ID(q_desire,id1,id2)
     q_distance = norm(q_1-q_2);
 end
 
-function cost = Distance_Cost_Function(real_distance,desired_distance,distance_tolerance)
-    if abs(real_distance-desired_distance)<=distance_tolerance 
-        cost=0;
-    elseif real_distance<desired_distance
+function cost = Distance_Cost_Function(real_distance,desired_distance)
+    if real_distance<desired_distance
         cost = (real_distance-desired_distance)^2/real_distance^2;
     else
         cost=0;  
     end
 end
 
-function [vel_vw,vel_xy] = Gradient_Controller(robot_idx,poses,q_desire,distance_tolerance,delta)
+function [vel_vw,vel_xy] = Gradient_Controller(robot_idx,poses,q_desire,delta)
     J = 0;
     Jdx=0;
     Jdy=0;
@@ -167,14 +166,14 @@ function [vel_vw,vel_xy] = Gradient_Controller(robot_idx,poses,q_desire,distance
             real_d = norm(pose_diff);
             real_d_x = norm(pose_diff_x);
             real_d_y = norm(pose_diff_y);
-            desired_d = Get_Desired_Distance_from_ID(q_desire,i,robot_idx);
-            J = J + Distance_Cost_Function(real_d,desired_d,distance_tolerance);
-            Jdx = Jdx + Distance_Cost_Function(real_d_x,desired_d,distance_tolerance);
-            Jdy = Jdy + Distance_Cost_Function(real_d_y,desired_d,distance_tolerance);
+            desired_d = 0.7;
+            J = J + Distance_Cost_Function(real_d,desired_d);
+            Jdx = Jdx + Distance_Cost_Function(real_d_x,desired_d);
+            Jdy = Jdy + Distance_Cost_Function(real_d_y,desired_d);
         end
     end
-    vel_xy(1,1) = (Jdx - J)*100;
-    vel_xy(2,1) = (Jdy - J)*100;
+    vel_xy(1,1) = (Jdx - J)*1000;
+    vel_xy(2,1) = (Jdy - J)*1000;
     if norm(vel_xy) > 1
         vel_xy = vel_xy/norm(vel_xy);
     end

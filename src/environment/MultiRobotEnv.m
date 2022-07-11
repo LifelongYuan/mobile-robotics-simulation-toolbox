@@ -274,7 +274,7 @@ classdef MultiRobotEnv < matlab.System
             if obj.showConnection
                 % Initialize customized plot : [connetion,real_time]
                 for r_connect = 1: obj.numRobots * (obj.numRobots-1)/2
-                        obj.ConnectionHandle{r_connect} = plot(obj.ax,0,0,'LineWidth',1);
+                        obj.ConnectionHandle{r_connect} = plot(obj.ax,0,0,'--','LineWidth',1.5);
                 end
             end
 
